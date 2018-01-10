@@ -19,6 +19,7 @@ def find_files_affected(path):
       if match_line:
         #print(len(match_line.group(1)),match_line.group(2))
         result[tempfile] = '1'
+        break
   return result
 
 def modify_files_affected(files_affected):
