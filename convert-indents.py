@@ -24,7 +24,7 @@ def find_files_affected(path):
 def modify_files_affected(files_affected):
   for file in files_affected:
     reg_expr = r'^(\t+)(.*)$'
-    REG_match = re.compile(reg_expr, re.M|re.I)   
+    REG_match = re.compile(reg_expr, re.M|re.I)
     with open(file, 'r') as f:
       read_file = f.readlines()
  
