@@ -56,49 +56,96 @@ parser.add_argument('-w', '--wldcd',
                     help="use with care, convert file(s) using wildcard")
 args = parser.parse_args()
 
-print(args)
-
-files_path = args.path
+action = args.action
+path = args.path
+file = args.file
+wldcd = args.wldcd
 files_affected = dict()
 
-def find_files_affected(path):
-    """ find files in directory """
+
+def tab_indent(_lines):
+    """ if tab indent found return True """
+    reg_tab_expr = r'^(\t+)(\S+.*)$'
+    REG_TAB_match = re.compile(reg_tab_expr, re.M|re.I)
+    for line in _lines:
+        match_line = REG_TAB_match.match(line)
+        if match_line:
+            return True
+    return False
+
+def space_indent(_lines):
+    """ if space indent found return True """
+    reg_space_expr = r'^( +)(\S+.*)$'
+    REG_SPACE_match = re.compile(reg_space_expr, re.M|re.I)
+    for line in _lines:
+        match_line = REG_SPACE_match.match(line)
+        if match_line:
+            return True
+    return False
+
+def find_files_affected(_path, _file, _wldcd, _action):
+    """ find files that need a fix """
     result = dict()
-    for filename in os.listdir(path):
-        tempfile = path + filename
-        with open(tempfile, 'r') as f:
-            read_data = f.readlines()
-
-        reg_tab_expr = r'^(\t+)(.*)$'
-        REG_TAB_match = re.compile(reg_tab_expr, re.M|re.I)
-
-        for line in read_data:
-            match_line = REG_TAB_match.match(line)
-            if match_line:
-                #print(len(match_line.group(1)),match_line.group(2))
+    if _path:
+        for filename in os.listdir(_path):
+            tempfile = _path + filename
+            with open(tempfile, 'r') as f:
+                read_data = f.readlines()
+    
+            if (_action == 't2s') and tab_indent(read_data):
                 result[tempfile] = '1'
-                break
+            elif (_action == 's2t') and space_indent(read_data):
+                result[tempfile] = '1'
+    elif _file:
+        if (_action == 't2s') and tab_indent(read_data):
+            result[_file] = '1'
+        elif (_action == 's2t') and space_indent(read_data):
+            result[_file] = '1'
+    elif _wldcd:
+        pass
+
     return result
 
-def modify_files_affected(files):
+def convert_tab_indent(_work_file, _org_file):
+    """ if tab indent found convert to space """
+    reg_tab_expr = r'^(\t+)(\S+.*)$'
+    REG_TAB_match = re.compile(reg_tab_expr, re.M|re.I)
+    work_file = open(_work_file, 'w')
+    for line in _org_file:
+        match_line = REG_TAB_match.match(line)
+        if match_line:
+            spaces = " "*(len(match_line.group(1))*4)
+            work_file.write(spaces + match_line.group(2) + "\n")
+        else:
+            work_file.write(line)
+    work_file.close()
+
+def convert_space_indent(_work_file, _org_file):
+    """ if space indent found convert to tab """
+    reg_space_expr = r'^( +)(\S+.*)$'
+    REG_SPACE_match = re.compile(reg_space_expr, re.M|re.I)
+    work_file = open(_work_file, 'w')
+    for line in _org_file:
+        match_line = REG_SPACE_match.match(line)
+        if match_line:
+            tabs = "\t"*(int(len(match_line.group(1))/4))
+            work_file.write(tabs + match_line.group(2) + "\n")
+        else:
+            work_file.write(line)
+    work_file.close()
+
+def modify_files_affected(_files, _wldcd, _action):
     """ fix indents """
-    for file in files:
-        reg_expr = r'^(\t+)(.*)$'
-        REG_match = re.compile(reg_expr, re.M|re.I)
-        with open(file, 'r') as f:
+    for _file in _files:
+        with open(_file, 'r') as f:
             read_file = f.readlines()
 
-        work_file = open(file, 'w')
-        for line in read_file:
-            match_line = REG_match.match(line)
-            if match_line:
-                spaces = " "*(len(match_line.group(1))*4)
-                work_file.write(spaces + match_line.group(2) + "\n")
-            else:
-                work_file.write(line)
+        if _action == 't2s':
+            convert_tab_indent(_file, read_file)
+        elif _action == 's2t':
+            convert_space_indent(_file, read_file)
 
-        work_file.close()
 
-files_affected = find_files_affected(files_path)
+files_affected = find_files_affected(path, file, wldcd, action)
 print('Files affected:', files_affected)
-modify_files_affected(files_affected)
+modify_files_affected(files_affected, wldcd, action)
