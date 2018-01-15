@@ -22,6 +22,8 @@ def msg():
         [-e, --ext     convert file with specific extension]
         [-w, --wldcd   use with care, convert file(s) using wildcard]
 
+        Only 'action' will not find files to convert, works with file, path and wldcd
+
         example:
         1) convert given file indents from tab to spaces, using 4 spaces (default) per tab
         convert_indents.py -a t2s -f fix_my_tab_indents.txt
@@ -148,4 +150,4 @@ def modify_files_affected(_files, _wldcd, _action):
 
 files_affected = find_files_affected(path, file, wldcd, action)
 print('Files affected:', files_affected)
-#modify_files_affected(files_affected, wldcd, action)
+modify_files_affected(files_affected, wldcd, action)
