@@ -104,7 +104,6 @@ def find_files_affected(_path, _file, _wldcd, _action):
             result[_file] = '1'
     elif _wldcd:
         pass
-
     return result
 
 def convert_tab_indent(_work_file, _org_file):
