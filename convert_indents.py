@@ -91,12 +91,13 @@ def find_files_affected(_path, _file, _wldcd, _action):
             tempfile = _path + filename
             with open(tempfile, 'r') as f:
                 read_data = f.readlines()
-    
             if (_action == 't2s') and tab_indent(read_data):
                 result[tempfile] = '1'
             elif (_action == 's2t') and space_indent(read_data):
                 result[tempfile] = '1'
     elif _file:
+        with open(_file, 'r') as f:
+            read_data = f.readlines()
         if (_action == 't2s') and tab_indent(read_data):
             result[_file] = '1'
         elif (_action == 's2t') and space_indent(read_data):
@@ -148,4 +149,4 @@ def modify_files_affected(_files, _wldcd, _action):
 
 files_affected = find_files_affected(path, file, wldcd, action)
 print('Files affected:', files_affected)
-modify_files_affected(files_affected, wldcd, action)
+#modify_files_affected(files_affected, wldcd, action)
