@@ -62,6 +62,7 @@ files_path = args.path
 files_affected = dict()
 
 def find_files_affected(path):
+    """ find files in directory """
     result = dict()
     for filename in os.listdir(path):
         tempfile = path + filename
@@ -80,6 +81,7 @@ def find_files_affected(path):
     return result
 
 def modify_files_affected(files):
+    """ fix indents """
     for file in files:
         reg_expr = r'^(\t+)(.*)$'
         REG_match = re.compile(reg_expr, re.M|re.I)
