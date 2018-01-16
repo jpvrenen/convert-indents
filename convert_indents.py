@@ -69,9 +69,12 @@ def tab_indent(_lines):
     """ if tab indent found return True """
     reg_tab_expr = r'^(\t+)(\S+.*)$'
     REG_TAB_match = re.compile(reg_tab_expr, re.M|re.I)
+    reg_ws_expr = r'^(\t+)$'
+    REG_WS_match = re.compile(reg_ws_expr, re.M|re.I)
     for line in _lines:
-        match_line = REG_TAB_match.match(line)
-        if match_line:
+        match_line_tab = REG_TAB_match.match(line)
+        match_line_ws = REG_WS_match.match(line)
+        if match_line_ws or match_line_tab:
             return True
     return False
 
@@ -79,9 +82,12 @@ def space_indent(_lines):
     """ if space indent found return True """
     reg_space_expr = r'^( +)(\S+.*)$'
     REG_SPACE_match = re.compile(reg_space_expr, re.M|re.I)
+    reg_ws_expr = r'^( +)$'
+    REG_WS_match = re.compile(reg_ws_expr, re.M|re.I)
     for line in _lines:
-        match_line = REG_SPACE_match.match(line)
-        if match_line:
+        match_line_tab = REG_SPACE_match.match(line)
+        match_line_ws = REG_WS_match.match(line)
+        if match_line_ws or match_line_tab:
             return True
     return False
 
@@ -112,12 +118,17 @@ def convert_tab_indent(_work_file, _org_file):
     """ if tab indent found convert to space """
     reg_tab_expr = r'^(\t+)(\S+.*)$'
     REG_TAB_match = re.compile(reg_tab_expr, re.M|re.I)
+    reg_ws_expr = r'^(\t+)$'
+    REG_WS_match = re.compile(reg_ws_expr, re.M|re.I)
     work_file = open(_work_file, 'w')
     for line in _org_file:
-        match_line = REG_TAB_match.match(line)
-        if match_line:
-            spaces = " "*(len(match_line.group(1))*4)
-            work_file.write(spaces + match_line.group(2) + "\n")
+        match_line_tab = REG_TAB_match.match(line)
+        match_line_ws = REG_WS_match.match(line)
+        if match_line_ws:
+            work_file.write("\n")
+        elif match_line_tab:
+            spaces = " "*(len(match_line_tab.group(1))*4)
+            work_file.write(spaces + match_line_tab.group(2) + "\n")
         else:
             work_file.write(line)
     work_file.close()
@@ -126,12 +137,17 @@ def convert_space_indent(_work_file, _org_file):
     """ if space indent found convert to tab """
     reg_space_expr = r'^( +)(\S+.*)$'
     REG_SPACE_match = re.compile(reg_space_expr, re.M|re.I)
+    reg_ws_expr = r'^( +)$'
+    REG_WS_match = re.compile(reg_ws_expr, re.M|re.I)
     work_file = open(_work_file, 'w')
     for line in _org_file:
-        match_line = REG_SPACE_match.match(line)
-        if match_line:
-            tabs = "\t"*(int(len(match_line.group(1))/4))
-            work_file.write(tabs + match_line.group(2) + "\n")
+        match_line_space = REG_SPACE_match.match(line)
+        match_line_ws = REG_WS_match.match(line)
+        if match_line_ws:
+            work_file.write("\n")
+        elif match_line_space:
+            tabs = "\t"*(int(len(match_line_space.group(1))/4))
+            work_file.write(tabs + match_line_space.group(2) + "\n")
         else:
             work_file.write(line)
     work_file.close()
