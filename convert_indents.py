@@ -62,6 +62,8 @@ action = args.action
 path = args.path
 file = args.file
 wldcd = args.wldcd
+space_ratio = args.spaces
+tab_ratio = args.tabs
 files_affected = dict()
 
 
@@ -133,7 +135,17 @@ def convert_tab_indent(_work_file, _org_file):
             work_file.write(line)
     work_file.close()
 
-def convert_space_indent(_work_file, _org_file):
+def return_nr_tabs(_no_of_spaces, _space_ratio):
+    if not _no_of_spaces%_space_ratio:
+        result = int(_no_of_spaces/space_ratio)
+        return result
+    elif _no_of_spaces%_space_ratio:
+        print("Irregular space found cannot divide, space ratio '-s, -> {0}' ".format(_space_ratio))
+        return 0
+    else:
+        return 0
+
+def convert_space_indent(_work_file, _org_file, _space_ratio):
     """ if space indent found convert to tab """
     reg_space_expr = r'^( +)(\S+.*)$'
     REG_SPACE_match = re.compile(reg_space_expr, re.M|re.I)
@@ -146,13 +158,16 @@ def convert_space_indent(_work_file, _org_file):
         if match_line_ws:
             work_file.write("\n")
         elif match_line_space:
-            tabs = "\t"*(int(len(match_line_space.group(1))/4))
-            work_file.write(tabs + match_line_space.group(2) + "\n")
+            tabs = "\t"*(return_nr_tabs(len(match_line_space.group(1)),_space_ratio))
+            if tabs:
+                work_file.write(tabs + match_line_space.group(2) + "\n")
+            else:
+                work_file.write("##convert_indents: correct manual->>" + match_line_space.group(2) + "\n")
         else:
             work_file.write(line)
     work_file.close()
 
-def modify_files_affected(_files, _wldcd, _action):
+def modify_files_affected(_files, _wldcd, _action, _space_ratio):
     """ fix indents """
     for _file in _files:
         with open(_file, 'r') as f:
@@ -161,9 +176,9 @@ def modify_files_affected(_files, _wldcd, _action):
         if _action == 't2s':
             convert_tab_indent(_file, read_file)
         elif _action == 's2t':
-            convert_space_indent(_file, read_file)
+            convert_space_indent(_file, read_file, _space_ratio)
 
 
 files_affected = find_files_affected(path, file, wldcd, action)
 print('Files affected:', files_affected)
-modify_files_affected(files_affected, wldcd, action)
+modify_files_affected(files_affected, wldcd, action, space_ratio)
