@@ -14,8 +14,6 @@ usage: convert_indents.py
         [-p, --path    convert all files in given path location]
         [-f, --file    convert specific file]
 
-        Only using 'action' will not find files to convert, 'action' works with options 'file' or 'path'
-
         example:
         1) convert given file indents from tab to spaces, using 4 spaces (default) per tab
         convert_indents.py -a t2s -f fix_my_tab_indents.txt

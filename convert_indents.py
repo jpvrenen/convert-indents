@@ -20,8 +20,6 @@ def msg():
         [-p, --path    convert all files in given path location]
         [-f, --file    convert specific file]
 
-        Only 'action' will not find files to convert, works with file, path and wldcd
-
         example:
         1) convert given file indents from tab to spaces, using 4 spaces (default) per tab
         convert_indents.py -a t2s -f fix_my_tab_indents.txt
@@ -57,8 +55,15 @@ try:
 except Exception as e:
     print(e)
 
-path = args.path
-file = args.file
+try:
+    path = args.path
+    file = args.file
+    if (not path) and (not file):
+        print("Please use program with option 'path' or 'file'")
+        sys.exit()
+except Exception as e:
+    print(e)
+
 space_ratio = args.spaces
 tab_ratio = args.tabs
 files_affected = dict()
