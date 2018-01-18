@@ -16,7 +16,7 @@ def msg():
         [-h, --help    show howto invoke and possible arguments]
         [-a, --action  specify action, t2s(tab 2 space) or s2t(space 2 tab)]
         [-s, --spaces  specify number of spaces per tab, default is 4]
-        [-t, --tabs    specify number of tabs per space, default is 1]
+        [-t, --tabs    specify tab per x number of spaces, default is 4 spaces per tab]
         [-p, --path    convert all files in given path location]
         [-f, --file    convert specific file]
 
@@ -37,7 +37,7 @@ parser.add_argument('-s', '--spaces',
                     help="specify number of spaces per tab, default is 4")
 parser.add_argument('-t', '--tabs',
                     default=4,
-                    help="specify number of tabs per x amount of space, default is 4 spaces per tab")
+                    help="specify tab per x number of spaces, default is 4 spaces per tab")
 parser.add_argument('-p', '--path',
                     dest='path',
                     default=False,
