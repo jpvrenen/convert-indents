@@ -20,5 +20,5 @@ usage: convert_indents.py
         1) convert given file indents from tab to spaces, using 4 spaces (default) per tab
         convert_indents.py -a t2s -f fix_my_tab_indents.txt
 
-convert_indents.py: error: the following arguments are required: -a/--action
+convert_indents.py: error: the following arguments are required: -a, --action
 ```
