@@ -1,7 +1,7 @@
 """
 We like to fix indents from tab to space or vice versa
 We can convert all files in given directory
-We can convert only given file
+We can convert a single given file
 
 @author: Jeroen van Renen, jpvrenen@hotmail.com
 """
@@ -19,8 +19,6 @@ def msg():
         [-t, --tabs    specify number of tabs per space, default is 1]
         [-p, --path    convert all files in given path location]
         [-f, --file    convert specific file]
-        [-e, --ext     convert file with specific extension]
-        [-w, --wldcd   use with care, convert file(s) using wildcard]
 
         Only 'action' will not find files to convert, works with file, path and wldcd
 
@@ -38,8 +36,8 @@ parser.add_argument('-s', '--spaces',
                     default=4,
                     help="specify number of spaces per tab, default is 4")
 parser.add_argument('-t', '--tabs',
-                    default=1,
-                    help="specify number of tabs per space, default is 1")
+                    default=4,
+                    help="specify number of tabs per x amount of space, default is 4 spaces per tab")
 parser.add_argument('-p', '--path',
                     dest='path',
                     default=False,
@@ -48,27 +46,26 @@ parser.add_argument('-f', '--file',
                     dest='file',
                     default=False,
                     help="convert specific file")
-parser.add_argument('-e', '--extn',
-                    dest='ext',
-                    default=False,
-                    help="convert file with specific extension")
-parser.add_argument('-w', '--wldcd',
-                    dest='wldcd',
-                    default=False,
-                    help="use with care, convert file(s) using wildcard")
 args = parser.parse_args()
 
-action = args.action
+try:
+    valid_action = ['t2s', 's2t']
+    action = args.action
+    if action not in valid_action:
+        print("Valid actions are 't2s' or 's2t', current action '{0}' ignored".format(action))
+        sys.exit()
+except Exception as e:
+    print(e)
+
 path = args.path
 file = args.file
-wldcd = args.wldcd
 space_ratio = args.spaces
 tab_ratio = args.tabs
 files_affected = dict()
 
 
 def tab_indent(_lines):
-    """ if tab indent found return True """
+    """ if tab indent or empty line found return True """
     reg_tab_expr = r'^(\t+)(\S+.*)$'
     REG_TAB_match = re.compile(reg_tab_expr, re.M|re.I)
     reg_ws_expr = r'^(\t+)$'
@@ -81,7 +78,7 @@ def tab_indent(_lines):
     return False
 
 def space_indent(_lines):
-    """ if space indent found return True """
+    """ if space indent or empty line found return True """
     reg_space_expr = r'^( +)(\S+.*)$'
     REG_SPACE_match = re.compile(reg_space_expr, re.M|re.I)
     reg_ws_expr = r'^( +)$'
@@ -93,7 +90,7 @@ def space_indent(_lines):
             return True
     return False
 
-def find_files_affected(_path, _file, _wldcd, _action):
+def find_files_affected(_path, _file, _action):
     """ find files that need a fix """
     result = dict()
     if _path:
@@ -112,11 +109,9 @@ def find_files_affected(_path, _file, _wldcd, _action):
             result[_file] = '1'
         elif (_action == 's2t') and space_indent(read_data):
             result[_file] = '1'
-    elif _wldcd:
-        pass
     return result
 
-def convert_tab_indent(_work_file, _org_file):
+def convert_tab_indent(_work_file, _org_file, _tab_ratio):
     """ if tab indent found convert to space """
     reg_tab_expr = r'^(\t+)(\S+.*)$'
     REG_TAB_match = re.compile(reg_tab_expr, re.M|re.I)
@@ -129,7 +124,7 @@ def convert_tab_indent(_work_file, _org_file):
         if match_line_ws:
             work_file.write("\n")
         elif match_line_tab:
-            spaces = " "*(len(match_line_tab.group(1))*4)
+            spaces = " "*(len(match_line_tab.group(1))*_tab_ratio)
             work_file.write(spaces + match_line_tab.group(2) + "\n")
         else:
             work_file.write(line)
@@ -162,23 +157,23 @@ def convert_space_indent(_work_file, _org_file, _space_ratio):
             if tabs:
                 work_file.write(tabs + match_line_space.group(2) + "\n")
             else:
-                work_file.write("##convert_indents: correct manual->>" + match_line_space.group(2) + "\n")
+                work_file.write("###correct_indent_manual###" + match_line_space.group(2) + "\n")
         else:
             work_file.write(line)
     work_file.close()
 
-def modify_files_affected(_files, _wldcd, _action, _space_ratio):
+def modify_files_affected(_files, _action, _space_ratio, _tab_ratio):
     """ fix indents """
     for _file in _files:
         with open(_file, 'r') as f:
             read_file = f.readlines()
 
         if _action == 't2s':
-            convert_tab_indent(_file, read_file)
+            convert_tab_indent(_file, read_file, _tab_ratio)
         elif _action == 's2t':
             convert_space_indent(_file, read_file, _space_ratio)
 
-
-files_affected = find_files_affected(path, file, wldcd, action)
-print('Files affected:', files_affected)
-modify_files_affected(files_affected, wldcd, action, space_ratio)
+if __name__ == '__main__':
+    files_affected = find_files_affected(path, file, action)
+    print('Files affected:', files_affected)
+    modify_files_affected(files_affected, action, space_ratio, tab_ratio)
