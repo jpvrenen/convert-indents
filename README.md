@@ -3,7 +3,7 @@ We like to fix indents from tab to space or vice versa
 
 We can convert all files in given directory
 
-We can convert a single given file
+We can convert a single given file,ok
 
 ```
 usage: convert_indents.py
